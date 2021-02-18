@@ -1,5 +1,15 @@
 import { OrbitControl } from "@oasis-engine/controls";
-import { AssetType, Camera, Script, SpriteRenderer, SystemInfo, Texture2D, Vector3, WebGLEngine } from "oasis-engine";
+import {
+  AssetType,
+  Camera,
+  Script,
+  Sprite,
+  SpriteRenderer,
+  SystemInfo,
+  Texture2D,
+  Vector3,
+  WebGLEngine
+} from "oasis-engine";
 
 //-- script for sprite
 class SpriteController extends Script {
@@ -59,8 +69,11 @@ for (let i = 0, l = icons.length; i < l; ++i) {
         type: AssetType.Texture2D
       })
       .then((resource) => {
-        spriteComponent.texture = resource;
-        const rect = spriteComponent.rect;
+        const sprite = new Sprite(engine, resource);
+        spriteComponent.sprite = sprite;
+        // spriteComponent.flipX = true;
+        // spriteComponent.flipY = true;
+        const rect = spriteComponent.sprite.rect;
         const scaleX = 100.0 / rect.width;
         const scaleY = 100.0 / rect.height;
         spriteEntity.transform.setScale(scaleX, scaleY, 1);
