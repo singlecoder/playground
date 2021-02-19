@@ -13,20 +13,42 @@ import {
 
 //-- script for sprite
 class SpriteController extends Script {
+  static _curRotation: number = 0;
   private _curRadian: number;
   private _radius: number;
+  private _scale: number;
+  private _scaleFlag: boolean;
 
   onAwake() {
     this._curRadian = 0;
     this._radius = 15;
+    this._scale = 1.0;
+    this._scaleFlag = true;
   }
 
   onUpdate() {
+    // Update position.
     this._curRadian += 0.01;
-    const { _radius, _curRadian } = this;
+    const { _radius, _curRadian, entity } = this;
+    const { transform } = entity;
     const posX = Math.cos(_curRadian) * _radius;
     const posY = Math.sin(_curRadian) * _radius;
-    this.entity.transform.setPosition(posX, posY, 0);
+    transform.setPosition(posX, posY, 0);
+
+    // Update scale.
+    this._scale += this._scaleFlag ? 0.01 : -0.01;
+    const { _scale } = this;
+    transform.setScale(_scale, _scale, _scale);
+    if (this._scale >= 1.5) {
+      this._scaleFlag = false;
+    } else if (this._scale <= 0.5) {
+      this._scaleFlag = true;
+    }
+
+    // Update rotation.
+    SpriteController._curRotation += 0.1;
+    const { _curRotation } = SpriteController;
+    transform.setRotation(0, 0, _curRotation);
   }
 }
 
