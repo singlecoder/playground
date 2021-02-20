@@ -62,35 +62,22 @@ const rootEntity = scene.createRootEntity();
 
 //-- create camera
 const cameraEntity = rootEntity.createChild("camera_entity");
-cameraEntity.transform.position = new Vector3(0, 0, 50);
+cameraEntity.transform.setPosition(0, 0, 50);
 cameraEntity.addComponent(Camera);
 cameraEntity.addComponent(OrbitControl);
 
 //-- create sprite renderer
-const icons = [
-  "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*d3N9RYpcKncAAAAAAAAAAAAAARQnAQ",
-  "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*d3N9RYpcKncAAAAAAAAAAAAAARQnAQ",
-  "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*d3N9RYpcKncAAAAAAAAAAAAAARQnAQ",
-  "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*d3N9RYpcKncAAAAAAAAAAAAAARQnAQ",
-  "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*d3N9RYpcKncAAAAAAAAAAAAAARQnAQ",
-  "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*d3N9RYpcKncAAAAAAAAAAAAAARQnAQ",
-  "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*d3N9RYpcKncAAAAAAAAAAAAAARQnAQ",
-  "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*d3N9RYpcKncAAAAAAAAAAAAAARQnAQ",
-  "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*d3N9RYpcKncAAAAAAAAAAAAAARQnAQ",
-  "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*d3N9RYpcKncAAAAAAAAAAAAAARQnAQ"
-];
-
-for (let i = 0, l = icons.length; i < l; ++i) {
-  setTimeout(() => {
-    const spriteEntity = rootEntity.createChild(`sprite_${i}`);
-    spriteEntity.transform.position = new Vector3(0, 0, 0);
-    const spriteComponent = spriteEntity.addComponent(SpriteRenderer);
-    engine.resourceManager
-      .load<Texture2D>({
-        url: icons[i],
-        type: AssetType.Texture2D
-      })
-      .then((resource) => {
+engine.resourceManager
+  .load<Texture2D>({
+    url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*d3N9RYpcKncAAAAAAAAAAAAAARQnAQ",
+    type: AssetType.Texture2D
+  })
+  .then((resource) => {
+    for (let i = 0; i < 10; ++i) {
+      setTimeout(() => {
+        const spriteEntity = rootEntity.createChild(`sprite_${i}`);
+        spriteEntity.transform.position = new Vector3(0, 0, 0);
+        const spriteComponent = spriteEntity.addComponent(SpriteRenderer);
         const sprite = new Sprite(engine, resource);
         spriteComponent.sprite = sprite;
         // spriteComponent.flipX = true;
@@ -100,8 +87,8 @@ for (let i = 0, l = icons.length; i < l; ++i) {
         const scaleY = 100.0 / rect.height;
         spriteEntity.transform.setScale(scaleX, scaleY, 1);
         spriteEntity.addComponent(SpriteController);
-      });
-  }, 1000 * i);
-}
+      }, 1000 * i);
+    }
+  });
 
 engine.run();
