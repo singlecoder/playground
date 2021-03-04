@@ -50,7 +50,7 @@ engine.resourceManager
     material.emissiveTexture = texture;
     material.emissiveColor.setValue(1, 1, 1, 1);
 
-    for (let i = 0; i < 3; ++i) {
+    for (let i = 0; i < 3; i++) {
       const posX = (i - 1) * distanceX;
 
       // Create cuboid
