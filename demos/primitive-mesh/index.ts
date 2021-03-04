@@ -10,7 +10,10 @@ import {
   BlinnPhongMaterial,
   Texture2D,
   AssetType,
-  DirectLight
+  DirectLight,
+  Vector3,
+  Material,
+  Mesh
 } from "oasis-engine";
 
 class RotateScript extends Script {
@@ -33,7 +36,7 @@ const rootEntity = scene.createRootEntity();
 
 // Create camera
 const cameraEntity = rootEntity.createChild("Camera");
-cameraEntity.transform.setPosition(0, 0, 50);
+cameraEntity.transform.setPosition(0, 0, 15);
 cameraEntity.addComponent(Camera);
 cameraEntity.addComponent(OrbitControl);
 
@@ -43,8 +46,16 @@ const light = lightEntity.addComponent(DirectLight);
 light.color.setValue(1, 1, 1, 1);
 light.intensity = 0.3;
 
-const distanceX = 8;
-const distanceY = 8;
+function generatePrimitiveEntity(type: string, position: Vector3, material: Material, mesh: Mesh) {
+  const entity = rootEntity.createChild(type);
+  entity.transform.setPosition(position.x, position.y, position.z);
+  entity.addComponent(RotateScript);
+  const renderer = entity.addComponent(MeshRenderer);
+  renderer.mesh = mesh;
+  renderer.setMaterial(material);
+
+  return entity;
+}
 
 engine.resourceManager
   .load<Texture2D>({
@@ -52,6 +63,11 @@ engine.resourceManager
     type: AssetType.Texture2D
   })
   .then((texture) => {
+    const distanceX = 2.5;
+    const distanceY = 2.5;
+    const tempPos = new Vector3();
+
+    // Create material
     const material = new BlinnPhongMaterial(engine);
     material.emissiveTexture = texture;
     material.emissiveColor.setValue(1, 1, 1, 1);
@@ -60,44 +76,20 @@ engine.resourceManager
       const posX = (i - 1) * distanceX;
 
       // Create cuboid
-      const cuboidEntity = rootEntity.createChild("cuboid");
-      const cuboidTransform = cuboidEntity.transform;
-      cuboidTransform.setPosition(posX, distanceY * 1.5, 0);
-      cuboidTransform.setScale(3, 3, 3);
-      cuboidEntity.addComponent(RotateScript);
-      const cuboidRenderer = cuboidEntity.addComponent(MeshRenderer);
-      cuboidRenderer.mesh = PrimitiveMesh.createCuboid(engine);
-      cuboidRenderer.setMaterial(material);
+      tempPos.setValue(posX, distanceY * 1.5, 0);
+      generatePrimitiveEntity("cuboid", tempPos, material, PrimitiveMesh.createCuboid(engine));
 
       // Create sphere
-      const sphereEntity = rootEntity.createChild("sphere");
-      const sphereTransform = sphereEntity.transform;
-      sphereTransform.setPosition(posX, distanceY * 0.5, 0);
-      sphereTransform.setScale(3, 3, 3);
-      sphereEntity.addComponent(RotateScript);
-      const sphereRenderer = sphereEntity.addComponent(MeshRenderer);
-      sphereRenderer.mesh = PrimitiveMesh.createSphere(engine, 0.5, (i + 1) * 6);
-      sphereRenderer.setMaterial(material);
+      tempPos.setValue(posX, distanceY * 0.5, 0);
+      generatePrimitiveEntity("sphere", tempPos, material, PrimitiveMesh.createSphere(engine));
 
       // Create plane
-      const planeEntity = rootEntity.createChild("plane");
-      const planeTransform = planeEntity.transform;
-      planeTransform.setPosition(posX, -distanceY * 0.5, 0);
-      planeTransform.setScale(3, 3, 3);
-      planeEntity.addComponent(RotateScript);
-      const planeRenderer = planeEntity.addComponent(MeshRenderer);
-      planeRenderer.mesh = PrimitiveMesh.createPlane(engine);
-      planeRenderer.setMaterial(material);
+      tempPos.setValue(posX, -distanceY * 0.5, 0);
+      generatePrimitiveEntity("plane", tempPos, material, PrimitiveMesh.createPlane(engine));
 
       // Create cylinder
-      const cylinderEntity = rootEntity.createChild("cylinder");
-      const cylinderTransform = cylinderEntity.transform;
-      cylinderTransform.setPosition(posX, -distanceY * 1.5, 0);
-      cylinderTransform.setScale(3, 3, 3);
-      cylinderEntity.addComponent(RotateScript);
-      const cylinderRenderer = cylinderEntity.addComponent(MeshRenderer);
-      cylinderRenderer.mesh = PrimitiveMesh.createCylinder(engine, 0.5, 2, (i + 1) * 6, 1);
-      cylinderRenderer.setMaterial(material);
+      tempPos.setValue(posX, -distanceY * 1.5, 0);
+      generatePrimitiveEntity("plane", tempPos, material, PrimitiveMesh.createCylinder(engine));
     }
   });
 

@@ -14,8 +14,9 @@ import {
 // Script for sprite
 class SpriteController extends Script {
   static _curRotation: number = 0;
+
+  private _radius: number = 1.5;
   private _curRadian: number;
-  private _radius: number;
   private _scale: number;
   private _scaleFlag: boolean;
 
