@@ -74,8 +74,8 @@ engine.resourceManager
 // Run engine
 engine.run();
 
-function generatePrimitiveEntity(type: string, position: Vector3, material: Material, mesh: Mesh): Entity {
-  const entity = rootEntity.createChild(type);
+function generatePrimitiveEntity(name: string, position: Vector3, material: Material, mesh: Mesh): Entity {
+  const entity = rootEntity.createChild(name);
   entity.transform.setPosition(position.x, position.y, position.z);
   entity.addComponent(RotateScript);
   const renderer = entity.addComponent(MeshRenderer);
