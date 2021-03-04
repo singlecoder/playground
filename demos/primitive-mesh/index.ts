@@ -37,7 +37,7 @@ const scene = engine.sceneManager.activeScene;
 const rootEntity = scene.createRootEntity();
 
 // Create camera
-const cameraEntity = rootEntity.createChild("camera_entity");
+const cameraEntity = rootEntity.createChild("Camera");
 cameraEntity.transform.setPosition(0, 0, 50);
 cameraEntity.addComponent(Camera);
 cameraEntity.addComponent(OrbitControl);
@@ -56,7 +56,11 @@ engine.resourceManager
     url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*ArCHTbfVPXUAAAAAAAAAAAAAARQnAQ",
     type: AssetType.Texture2D
   })
-  .then((resource) => {
+  .then((texture) => {
+    const material = new BlinnPhongMaterial(engine);
+    material.emissiveTexture = texture;
+    material.emissiveColor.setValue(1, 1, 1, 1);
+
     for (let i = 0; i < 3; ++i) {
       const posX = (i - 1) * distanceX;
 
@@ -67,11 +71,8 @@ engine.resourceManager
       cuboidTransform.setScale(3, 3, 3);
       cuboidEntity.addComponent(RotateScript);
       const cuboidRenderer = cuboidEntity.addComponent(MeshRenderer);
-      const cuboidMaterial = new BlinnPhongMaterial(engine);
-      cuboidMaterial.emissiveTexture = resource;
-      cuboidMaterial.emissiveColor.setValue(1, 1, 1, 1);
       cuboidRenderer.mesh = PrimitiveMesh.createCuboid(engine);
-      cuboidRenderer.setMaterial(cuboidMaterial);
+      cuboidRenderer.setMaterial(material);
 
       // Create sphere
       const sphereEntity = rootEntity.createChild("sphere");
@@ -80,11 +81,8 @@ engine.resourceManager
       sphereTransform.setScale(3, 3, 3);
       sphereEntity.addComponent(RotateScript);
       const sphereRenderer = sphereEntity.addComponent(MeshRenderer);
-      const sphereMaterial = new BlinnPhongMaterial(engine);
-      sphereMaterial.emissiveTexture = resource;
-      sphereMaterial.emissiveColor.setValue(1, 1, 1, 1);
       sphereRenderer.mesh = PrimitiveMesh.createSphere(engine, 0.5, (i + 1) * 6);
-      sphereRenderer.setMaterial(sphereMaterial);
+      sphereRenderer.setMaterial(material);
 
       // Create plane
       const planeEntity = rootEntity.createChild("plane");
@@ -93,11 +91,8 @@ engine.resourceManager
       planeTransform.setScale(3, 3, 3);
       planeEntity.addComponent(RotateScript);
       const planeRenderer = planeEntity.addComponent(MeshRenderer);
-      const planeMaterial = new BlinnPhongMaterial(engine);
-      planeMaterial.emissiveTexture = resource;
-      planeMaterial.emissiveColor.setValue(1, 1, 1, 1);
       planeRenderer.mesh = PrimitiveMesh.createPlane(engine);
-      planeRenderer.setMaterial(planeMaterial);
+      planeRenderer.setMaterial(material);
 
       // Create cylinder
       const cylinderEntity = rootEntity.createChild("cylinder");
@@ -106,11 +101,8 @@ engine.resourceManager
       cylinderTransform.setScale(3, 3, 3);
       cylinderEntity.addComponent(RotateScript);
       const cylinderRenderer = cylinderEntity.addComponent(MeshRenderer);
-      const cylinderMaterial = new BlinnPhongMaterial(engine);
-      cylinderMaterial.emissiveTexture = resource;
-      cylinderMaterial.emissiveColor.setValue(1, 1, 1, 1);
       cylinderRenderer.mesh = PrimitiveMesh.createCylinder(engine, 0.5, 2, (i + 1) * 6, 1);
-      cylinderRenderer.setMaterial(cylinderMaterial);
+      cylinderRenderer.setMaterial(material);
     }
   });
 

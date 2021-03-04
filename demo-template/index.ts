@@ -10,7 +10,7 @@ const scene = engine.sceneManager.activeScene;
 const rootEntity = scene.createRootEntity();
 
 // Create camera
-const cameraEntity = rootEntity.createChild("camera_entity");
+const cameraEntity = rootEntity.createChild("Camera");
 cameraEntity.transform.position = new Vector3(0, 0, 50);
 cameraEntity.addComponent(Camera);
 cameraEntity.addComponent(OrbitControl);
