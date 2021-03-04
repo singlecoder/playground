@@ -14,17 +14,12 @@ import {
 } from "oasis-engine";
 
 class RotateScript extends Script {
-  private _rotateX: number;
-  private _rotateY: number;
-
   constructor(entity: Entity) {
     super(entity);
-
-    this._rotateX = 0.5;
-    this._rotateY = 0.6;
   }
+
   onUpdate() {
-    this.entity.transform.rotate(this._rotateX, this._rotateY, 0);
+    this.entity.transform.rotate(0.5, 0.6, 0);
   }
 }
 
