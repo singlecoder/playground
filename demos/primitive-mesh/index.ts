@@ -28,7 +28,7 @@ class RotateScript extends Script {
   }
 }
 
-//-- create engine object
+// Create engine object
 const engine = new WebGLEngine("o3-demo");
 engine.canvas.width = window.innerWidth * SystemInfo.devicePixelRatio;
 engine.canvas.height = window.innerHeight * SystemInfo.devicePixelRatio;
@@ -36,15 +36,14 @@ engine.canvas.height = window.innerHeight * SystemInfo.devicePixelRatio;
 const scene = engine.sceneManager.activeScene;
 const rootEntity = scene.createRootEntity();
 
-//-- create camera
+// Create camera
 const cameraEntity = rootEntity.createChild("camera_entity");
 cameraEntity.transform.setPosition(0, 0, 50);
 cameraEntity.addComponent(Camera);
 cameraEntity.addComponent(OrbitControl);
 
-//-- create direct light
+// Create direct light
 const lightEntity = rootEntity.createChild("DirectLight");
-lightEntity.transform.setPosition(-30, 20, 10);
 const light = lightEntity.addComponent(DirectLight);
 light.color.setValue(1, 1, 1, 1);
 light.intensity = 0.3;
@@ -61,7 +60,7 @@ engine.resourceManager
     for (let i = 0; i < 3; ++i) {
       const posX = (i - 1) * distanceX;
 
-      //-- Create cuboid
+      // Create cuboid
       const cuboidEntity = rootEntity.createChild("cuboid");
       const cuboidTransform = cuboidEntity.transform;
       cuboidTransform.setPosition(posX, distanceY * 1.5, 0);
@@ -74,7 +73,7 @@ engine.resourceManager
       cuboidRenderer.mesh = PrimitiveMesh.createCuboid(engine);
       cuboidRenderer.setMaterial(cuboidMaterial);
 
-      //-- Create sphere
+      // Create sphere
       const sphereEntity = rootEntity.createChild("sphere");
       const sphereTransform = sphereEntity.transform;
       sphereTransform.setPosition(posX, distanceY * 0.5, 0);
@@ -87,7 +86,7 @@ engine.resourceManager
       sphereRenderer.mesh = PrimitiveMesh.createSphere(engine, 0.5, (i + 1) * 6);
       sphereRenderer.setMaterial(sphereMaterial);
 
-      //-- Create plane
+      // Create plane
       const planeEntity = rootEntity.createChild("plane");
       const planeTransform = planeEntity.transform;
       planeTransform.setPosition(posX, -distanceY * 0.5, 0);
@@ -100,7 +99,7 @@ engine.resourceManager
       planeRenderer.mesh = PrimitiveMesh.createPlane(engine);
       planeRenderer.setMaterial(planeMaterial);
 
-      //-- Create cylinder
+      // Create cylinder
       const cylinderEntity = rootEntity.createChild("cylinder");
       const cylinderTransform = cylinderEntity.transform;
       cylinderTransform.setPosition(posX, -distanceY * 1.5, 0);

@@ -14,5 +14,5 @@
   { "label": "动画渐变过渡", "src": "animation-cross-fade" },
   { "label": "自定义材质-水", "src": "shader-water" },
   { "label": "精灵渲染器", "src": "sprite-renderer" },
-  { "label": "几何体网格渲染", "src": "mesh-renderer" }
+  { "label": "基本网格", "src": "primitive-mesh" }
 ]

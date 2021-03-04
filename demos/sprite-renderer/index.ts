@@ -11,7 +11,7 @@ import {
   WebGLEngine
 } from "oasis-engine";
 
-//-- script for sprite
+// Script for sprite
 class SpriteController extends Script {
   static _curRotation: number = 0;
   private _curRadian: number;
@@ -52,7 +52,7 @@ class SpriteController extends Script {
   }
 }
 
-//-- create engine object
+// Create engine object
 const engine = new WebGLEngine("o3-demo");
 engine.canvas.width = window.innerWidth * SystemInfo.devicePixelRatio;
 engine.canvas.height = window.innerHeight * SystemInfo.devicePixelRatio;
@@ -60,13 +60,13 @@ engine.canvas.height = window.innerHeight * SystemInfo.devicePixelRatio;
 const scene = engine.sceneManager.activeScene;
 const rootEntity = scene.createRootEntity();
 
-//-- create camera
+// Create camera
 const cameraEntity = rootEntity.createChild("camera_entity");
 cameraEntity.transform.setPosition(0, 0, 50);
 cameraEntity.addComponent(Camera);
 cameraEntity.addComponent(OrbitControl);
 
-//-- create sprite renderer
+// Create sprite renderer
 engine.resourceManager
   .load<Texture2D>({
     url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*d3N9RYpcKncAAAAAAAAAAAAAARQnAQ",
