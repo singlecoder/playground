@@ -73,13 +73,13 @@ engine.resourceManager
     url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*d3N9RYpcKncAAAAAAAAAAAAAARQnAQ",
     type: AssetType.Texture2D
   })
-  .then((resource) => {
+  .then((texture) => {
     for (let i = 0; i < 10; ++i) {
       setTimeout(() => {
         const spriteEntity = rootEntity.createChild(`sprite_${i}`);
         spriteEntity.transform.position = new Vector3(0, 0, 0);
         const spriteComponent = spriteEntity.addComponent(SpriteRenderer);
-        const sprite = new Sprite(engine, resource);
+        const sprite = new Sprite(engine, texture);
         spriteComponent.sprite = sprite;
         // spriteComponent.flipX = true;
         // spriteComponent.flipY = true;
