@@ -11,6 +11,47 @@ import {
   WebGLEngine
 } from "oasis-engine";
 
+// Create engine object
+const engine = new WebGLEngine("o3-demo");
+engine.canvas.width = window.innerWidth * SystemInfo.devicePixelRatio;
+engine.canvas.height = window.innerHeight * SystemInfo.devicePixelRatio;
+
+const scene = engine.sceneManager.activeScene;
+const rootEntity = scene.createRootEntity();
+
+// Create camera
+const cameraEntity = rootEntity.createChild("camera_entity");
+cameraEntity.transform.setPosition(0, 0, 50);
+cameraEntity.addComponent(Camera);
+cameraEntity.addComponent(OrbitControl);
+
+// Create sprite renderer
+engine.resourceManager
+  .load<Texture2D>({
+    url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*d3N9RYpcKncAAAAAAAAAAAAAARQnAQ",
+    type: AssetType.Texture2D
+  })
+  .then((texture) => {
+    for (let i = 0; i < 10; ++i) {
+      setTimeout(() => {
+        const spriteEntity = rootEntity.createChild(`sprite_${i}`);
+        spriteEntity.transform.position = new Vector3(0, 0, 0);
+        const spriteRenderer = spriteEntity.addComponent(SpriteRenderer);
+        const sprite = new Sprite(engine, texture);
+        spriteRenderer.sprite = sprite;
+        // spriteRenderer.flipX = true;
+        // spriteRenderer.flipY = true;
+        const rect = spriteRenderer.sprite.rect;
+        const scaleX = 100.0 / rect.width;
+        const scaleY = 100.0 / rect.height;
+        spriteEntity.transform.setScale(scaleX, scaleY, 1);
+        spriteEntity.addComponent(SpriteController);
+      }, 1000 * i);
+    }
+  });
+
+engine.run();
+
 // Script for sprite
 class SpriteController extends Script {
   static _curRotation: number = 0;
@@ -52,44 +93,3 @@ class SpriteController extends Script {
     transform.setRotation(0, 0, _curRotation);
   }
 }
-
-// Create engine object
-const engine = new WebGLEngine("o3-demo");
-engine.canvas.width = window.innerWidth * SystemInfo.devicePixelRatio;
-engine.canvas.height = window.innerHeight * SystemInfo.devicePixelRatio;
-
-const scene = engine.sceneManager.activeScene;
-const rootEntity = scene.createRootEntity();
-
-// Create camera
-const cameraEntity = rootEntity.createChild("camera_entity");
-cameraEntity.transform.setPosition(0, 0, 50);
-cameraEntity.addComponent(Camera);
-cameraEntity.addComponent(OrbitControl);
-
-// Create sprite renderer
-engine.resourceManager
-  .load<Texture2D>({
-    url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*d3N9RYpcKncAAAAAAAAAAAAAARQnAQ",
-    type: AssetType.Texture2D
-  })
-  .then((texture) => {
-    for (let i = 0; i < 10; ++i) {
-      setTimeout(() => {
-        const spriteEntity = rootEntity.createChild(`sprite_${i}`);
-        spriteEntity.transform.position = new Vector3(0, 0, 0);
-        const spriteComponent = spriteEntity.addComponent(SpriteRenderer);
-        const sprite = new Sprite(engine, texture);
-        spriteComponent.sprite = sprite;
-        // spriteComponent.flipX = true;
-        // spriteComponent.flipY = true;
-        const rect = spriteComponent.sprite.rect;
-        const scaleX = 100.0 / rect.width;
-        const scaleY = 100.0 / rect.height;
-        spriteEntity.transform.setScale(scaleX, scaleY, 1);
-        spriteEntity.addComponent(SpriteController);
-      }, 1000 * i);
-    }
-  });
-
-engine.run();
