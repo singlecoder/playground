@@ -1,19 +1,19 @@
 import { OrbitControl } from "@oasis-engine/controls";
 import {
-  Camera,
-  PrimitiveMesh,
-  MeshRenderer,
-  SystemInfo,
-  WebGLEngine,
-  Script,
-  Entity,
-  BlinnPhongMaterial,
-  Texture2D,
   AssetType,
+  BlinnPhongMaterial,
+  Camera,
   DirectLight,
-  Vector3,
+  Entity,
   Material,
-  Mesh
+  MeshRenderer,
+  ModelMesh,
+  PrimitiveMesh,
+  Script,
+  SystemInfo,
+  Texture2D,
+  Vector3,
+  WebGLEngine
 } from "oasis-engine";
 
 // Create engine
@@ -74,7 +74,7 @@ engine.resourceManager
 // Run engine
 engine.run();
 
-function generatePrimitiveEntity(name: string, position: Vector3, material: Material, mesh: Mesh): Entity {
+function generatePrimitiveEntity(name: string, position: Vector3, material: Material, mesh: ModelMesh): Entity {
   const entity = rootEntity.createChild(name);
   entity.transform.setPosition(position.x, position.y, position.z);
   entity.addComponent(RotateScript);
