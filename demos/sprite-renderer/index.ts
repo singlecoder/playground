@@ -28,7 +28,7 @@ cameraEntity.addComponent(OrbitControl);
 // Create sprite renderer
 engine.resourceManager
   .load<Texture2D>({
-    url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*d3N9RYpcKncAAAAAAAAAAAAAARQnAQ",
+    url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*ApFPTZSqcMkAAAAAAAAAAAAAARQnAQ",
     type: AssetType.Texture2D
   })
   .then((texture) => {
@@ -46,7 +46,7 @@ engine.resourceManager
         const scaleY = 100.0 / rect.height;
         spriteEntity.transform.setScale(scaleX, scaleY, 1);
         spriteEntity.addComponent(SpriteController);
-      }, 1000 * i);
+      }, 2000 * i);
     }
   });
 
@@ -64,13 +64,13 @@ class SpriteController extends Script {
   onAwake() {
     this._curRadian = 0;
     this._radius = 15;
-    this._scale = 1.0;
+    this._scale = 0.5;
     this._scaleFlag = true;
   }
 
   onUpdate() {
     // Update position.
-    this._curRadian += 0.01;
+    this._curRadian += 0.005;
     const { _radius, _curRadian, entity } = this;
     const { transform } = entity;
     const posX = Math.cos(_curRadian) * _radius;
@@ -78,17 +78,17 @@ class SpriteController extends Script {
     transform.setPosition(posX, posY, 0);
 
     // Update scale.
-    this._scale += this._scaleFlag ? 0.01 : -0.01;
+    this._scale += this._scaleFlag ? 0.005 : -0.005;
     const { _scale } = this;
     transform.setScale(_scale, _scale, _scale);
-    if (this._scale >= 1.5) {
+    if (this._scale >= 0.6) {
       this._scaleFlag = false;
-    } else if (this._scale <= 0.5) {
+    } else if (this._scale <= 0.4) {
       this._scaleFlag = true;
     }
 
     // Update rotation.
-    SpriteController._curRotation += 0.1;
+    SpriteController._curRotation += 0.05;
     const { _curRotation } = SpriteController;
     transform.setRotation(0, 0, _curRotation);
   }
