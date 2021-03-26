@@ -26,7 +26,7 @@ const rootEntity = engine.sceneManager.activeScene.createRootEntity();
 
 // Create camera
 const cameraEntity = rootEntity.createChild("Camera");
-cameraEntity.transform.setPosition(0, 0, 15);
+cameraEntity.transform.setPosition(0, 0, 20);
 cameraEntity.addComponent(Camera);
 cameraEntity.addComponent(OrbitControl);
 
@@ -68,6 +68,10 @@ engine.resourceManager
       // Create cylinder
       position.setValue(posX, -distanceY * 1.5, 0);
       generatePrimitiveEntity("cylinder", position, material, PrimitiveMesh.createCylinder(engine));
+
+      // Create turos
+      position.setValue(posX, -distanceY * 2.5, 0);
+      generatePrimitiveEntity("cuboid", position, material, PrimitiveMesh.createTorus(engine));
     }
   });
 
