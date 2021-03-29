@@ -54,20 +54,24 @@ engine.resourceManager
       const posX = (i - 1) * distanceX;
 
       // Create cuboid
-      position.setValue(posX, distanceY * 1.5, 0);
+      position.setValue(posX, distanceY * 2.5, 0);
       generatePrimitiveEntity("cuboid", position, material, PrimitiveMesh.createCuboid(engine));
 
       // Create sphere
-      position.setValue(posX, distanceY * 0.5, 0);
+      position.setValue(posX, distanceY * 1.5, 0);
       generatePrimitiveEntity("sphere", position, material, PrimitiveMesh.createSphere(engine));
 
       // Create plane
-      position.setValue(posX, -distanceY * 0.5, 0);
+      position.setValue(posX, distanceY * 0.5, 0);
       generatePrimitiveEntity("plane", position, material, PrimitiveMesh.createPlane(engine));
 
       // Create cylinder
-      position.setValue(posX, -distanceY * 1.5, 0);
+      position.setValue(posX, -distanceY * 0.5, 0);
       generatePrimitiveEntity("cylinder", position, material, PrimitiveMesh.createCylinder(engine));
+
+      // Create cone
+      position.setValue(posX, -distanceY * 1.5, 0);
+      generatePrimitiveEntity("cone", position, material, PrimitiveMesh.createCone(engine));
 
       // Create turos
       position.setValue(posX, -distanceY * 2.5, 0);
