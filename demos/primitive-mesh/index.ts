@@ -75,7 +75,7 @@ engine.resourceManager
 
       // Create turos
       position.setValue(posX, -distanceY * 2.5, 0);
-      generatePrimitiveEntity("cuboid", position, material, PrimitiveMesh.createTorus(engine));
+      generatePrimitiveEntity("torus", position, material, PrimitiveMesh.createTorus(engine));
     }
   });
 
