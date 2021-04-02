@@ -38,21 +38,20 @@ engine.resourceManager
     spriteRenderer.sprite = new Sprite(engine, texture);
 
     // Display flip x
-    generateFlipEntity(spriteEntity, -5, true, false);
+    showFlipEntity(spriteEntity, -5, true, false);
     // Display flip y
-    generateFlipEntity(spriteEntity, 5, false, true);
+    showFlipEntity(spriteEntity, 5, false, true);
     // Display flip x and y
-    generateFlipEntity(spriteEntity, 15, true, true);
+    showFlipEntity(spriteEntity, 15, true, true);
   });
 
 engine.run();
 
-function generateFlipEntity(entity: Entity, posX: number, flipX: boolean, flipY: boolean): Entity {
+function showFlipEntity(entity: Entity, posX: number, flipX: boolean, flipY: boolean): void {
   const flipEntity = entity.clone();
   rootEntity.addChild(flipEntity);
   flipEntity.transform.setPosition(posX, 0, 0);
   const flipRenderer = flipEntity.getComponent(SpriteRenderer);
   flipRenderer.flipX = flipX;
   flipRenderer.flipY = flipY;
-  return flipEntity;
 }
