@@ -1,5 +1,15 @@
 import { OrbitControl } from "@oasis-engine/controls";
-import { AssetType, Camera, Sprite, SpriteRenderer, SystemInfo, Texture2D, Vector3, WebGLEngine } from "oasis-engine";
+import {
+  AssetType,
+  Camera,
+  Entity,
+  Sprite,
+  SpriteRenderer,
+  SystemInfo,
+  Texture2D,
+  Vector3,
+  WebGLEngine
+} from "oasis-engine";
 
 // Create engine object
 const engine = new WebGLEngine("o3-demo");
@@ -28,24 +38,21 @@ engine.resourceManager
     spriteRenderer.sprite = new Sprite(engine, texture);
 
     // Display flip x
-    const flipXSpriteEntity = spriteEntity.clone();
-    rootEntity.addChild(flipXSpriteEntity);
-    flipXSpriteEntity.transform.setPosition(-5, 0, 0);
-    flipXSpriteEntity.getComponent(SpriteRenderer).flipX = true;
-
+    generateFlipEntity(spriteEntity, -5, true, false);
     // Display flip y
-    const flipYSpriteEntity = spriteEntity.clone();
-    rootEntity.addChild(flipYSpriteEntity);
-    flipYSpriteEntity.transform.setPosition(5, 0, 0);
-    flipYSpriteEntity.getComponent(SpriteRenderer).flipY = true;
-
+    generateFlipEntity(spriteEntity, 5, false, true);
     // Display flip x and y
-    const flipSpriteEntity = spriteEntity.clone();
-    rootEntity.addChild(flipSpriteEntity);
-    flipSpriteEntity.transform.setPosition(15, 0, 0);
-    const flipSpriteRenderer = flipSpriteEntity.getComponent(SpriteRenderer);
-    flipSpriteRenderer.flipX = true;
-    flipSpriteRenderer.flipY = true;
+    generateFlipEntity(spriteEntity, 15, true, true);
   });
 
 engine.run();
+
+function generateFlipEntity(entity: Entity, posX: number, flipX: boolean, flipY: boolean): Entity {
+  const flipEntity = entity.clone();
+  rootEntity.addChild(flipEntity);
+  flipEntity.transform.setPosition(posX, 0, 0);
+  const flipRenderer = flipEntity.getComponent(SpriteRenderer);
+  flipRenderer.flipX = flipX;
+  flipRenderer.flipY = flipY;
+  return flipEntity;
+}
