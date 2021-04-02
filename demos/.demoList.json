@@ -19,5 +19,5 @@
   { "label": "变换", "src": "transform-x" },
   { "label": "PBR-基本", "src": "pbr-base" },
   { "label": "纹理缩放偏移", "src": "material-tilingoffset" },
-  { "label": "sprite-flip", "src": "sprite-flip" }
+  { "label": "精灵翻转", "src": "sprite-flip" }
 ]
