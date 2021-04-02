@@ -21,25 +21,31 @@ engine.resourceManager
     type: AssetType.Texture2D
   })
   .then((texture) => {
-    const sprite = new Sprite(engine, texture);
-    for (let i = 0; i < 4; ++i) {
-      const spriteEntity = rootEntity.createChild(`sprite_${i}`);
-      spriteEntity.transform.setPosition(10 * i - 15, 0, 0);
-      const spriteRenderer = spriteEntity.addComponent(SpriteRenderer);
-      spriteRenderer.sprite = sprite;
+    // Display normal
+    const spriteEntity = rootEntity.createChild("spriteFlip");
+    spriteEntity.transform.setPosition(-15, 0, 0);
+    const spriteRenderer = spriteEntity.addComponent(SpriteRenderer);
+    spriteRenderer.sprite = new Sprite(engine, texture);
 
-      if (i === 1) {
-        // Display flip x
-        spriteRenderer.flipX = true;
-      } else if (i === 2) {
-        // Display flip y
-        spriteRenderer.flipY = true;
-      } else if (i === 3) {
-        // Display flip x and y
-        spriteRenderer.flipX = true;
-        spriteRenderer.flipY = true;
-      }
-    }
+    // Display flip x
+    const flipXSpriteEntity = spriteEntity.clone();
+    rootEntity.addChild(flipXSpriteEntity);
+    flipXSpriteEntity.transform.setPosition(-5, 0, 0);
+    flipXSpriteEntity.getComponent(SpriteRenderer).flipX = true;
+
+    // Display flip y
+    const flipYSpriteEntity = spriteEntity.clone();
+    rootEntity.addChild(flipYSpriteEntity);
+    flipYSpriteEntity.transform.setPosition(5, 0, 0);
+    flipYSpriteEntity.getComponent(SpriteRenderer).flipY = true;
+
+    // Display flip x and y
+    const flipSpriteEntity = spriteEntity.clone();
+    rootEntity.addChild(flipSpriteEntity);
+    flipSpriteEntity.transform.setPosition(15, 0, 0);
+    const flipSpriteRenderer = flipSpriteEntity.getComponent(SpriteRenderer);
+    flipSpriteRenderer.flipX = true;
+    flipSpriteRenderer.flipY = true;
   });
 
 engine.run();
