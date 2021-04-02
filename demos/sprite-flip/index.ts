@@ -21,18 +21,21 @@ engine.resourceManager
     type: AssetType.Texture2D
   })
   .then((texture) => {
+    const sprite = new Sprite(engine, texture);
     for (let i = 0; i < 4; ++i) {
       const spriteEntity = rootEntity.createChild(`sprite_${i}`);
-      const { transform } = spriteEntity;
-      transform.setPosition(5 + 10 * (i - 2), 0, 0);
+      spriteEntity.transform.setPosition(10 * i - 15, 0, 0);
       const spriteRenderer = spriteEntity.addComponent(SpriteRenderer);
-      spriteRenderer.sprite = new Sprite(engine, texture);
+      spriteRenderer.sprite = sprite;
 
       if (i === 1) {
+        // Display flip x
         spriteRenderer.flipX = true;
       } else if (i === 2) {
+        // Display flip y
         spriteRenderer.flipY = true;
       } else if (i === 3) {
+        // Display flip x and y
         spriteRenderer.flipX = true;
         spriteRenderer.flipY = true;
       }
