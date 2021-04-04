@@ -6,6 +6,7 @@ import {
   Camera,
   CullMode,
   Engine,
+  Entity,
   Material,
   RenderQueueType,
   Shader,
@@ -35,34 +36,39 @@ cameraEntity.addComponent(OrbitControl);
 
 engine.resourceManager
   .load<Texture2D>({
-    url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*qrYcQYE-SOoAAAAAAAAAAAAAARQnAQ",
+    url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*L2GNRLWn9EAAAAAAAAAAAAAAARQnAQ",
     type: AssetType.Texture2D
   })
   .then((texture) => {
     texture.wrapModeU = texture.wrapModeV = TextureWrapMode.Clamp;
+    const texSize = new Vector2(texture.width, texture.height);
 
     // Create origin sprite entity.
     const spriteEntity = rootEntity.createChild("spriteBlur");
     spriteEntity.addComponent(SpriteRenderer).sprite = new Sprite(engine, texture);
     const { transform } = spriteEntity;
-    transform.setScale(5, 5, 5);
-    transform.setPosition(-10, 0, 0);
+    transform.setScale(4, 4, 4);
 
-    // Show a sprite with sprite blur material
-    const spriteMaterialEntity = spriteEntity.clone();
-    rootEntity.addChild(spriteMaterialEntity);
-    spriteMaterialEntity.transform.setPosition(10, 0, 0);
-    // Create sprite blur material
-    const customMaterial = new SpriteBlurMaterial(engine);
-    spriteMaterialEntity.getComponent(SpriteRenderer).setMaterial(customMaterial);
-    const { shaderData } = customMaterial;
-    const { width, height } = texture;
-    // Use u_blurSize to adjust the blur intensity
-    shaderData.setFloat("u_blurSize", 1.0);
-    shaderData.setVector2("u_texSize", new Vector2(width, height));
+    // Display normal
+    addCustomMaterialSpriteEntity(spriteEntity, -22.5, texSize, 0.0);
+    // Display low blur
+    addCustomMaterialSpriteEntity(spriteEntity.clone(), -7.5, texSize, 1.0);
+    // Display moderate blur
+    addCustomMaterialSpriteEntity(spriteEntity.clone(), 7.5, texSize, 2.0);
+    // Display highly blur
+    addCustomMaterialSpriteEntity(spriteEntity.clone(), 22.5, texSize, 3.0);
   });
 
 engine.run();
+
+function addCustomMaterialSpriteEntity(entity: Entity, posX: number, texSize: Vector2, blurSize: number) {
+  rootEntity.addChild(entity);
+  entity.transform.setPosition(posX, 0, 0);
+  const material = new SpriteBlurMaterial(engine);
+  material.texSize = texSize;
+  material.blurSize = blurSize;
+  entity.getComponent(SpriteRenderer).setMaterial(material);
+}
 
 // Custom shader
 const spriteVertShader = `
@@ -138,6 +144,30 @@ Shader.create("SpriteBlur", spriteVertShader, spriteFragmentShader);
 
 // Custom material
 class SpriteBlurMaterial extends Material {
+  private _texSize: Vector2 = new Vector2(1.0, 1.0);
+  private _blurSize: number = 0.0;
+
+  // Texture size
+  get texSize(): Vector2 {
+    return this._texSize;
+  }
+
+  set texSize(v: Vector2) {
+    const { _texSize } = this;
+    v.cloneTo(_texSize);
+    this.shaderData.setVector2("u_texSize", _texSize);
+  }
+
+  // Blur size
+  get blurSize(): number {
+    return this._blurSize;
+  }
+
+  set blurSize(size: number) {
+    this._blurSize = size;
+    this.shaderData.setFloat("u_blurSize", size);
+  }
+
   constructor(engine: Engine) {
     super(engine, Shader.find("SpriteBlur"));
 
@@ -151,5 +181,8 @@ class SpriteBlurMaterial extends Material {
     this.renderState.depthState.writeEnabled = false;
     this.renderQueueType = RenderQueueType.Transparent;
     this.renderState.rasterState.cullMode = CullMode.Off;
+
+    this.texSize = this._texSize;
+    this.blurSize = this._blurSize;
   }
 }
