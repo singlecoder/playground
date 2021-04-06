@@ -60,7 +60,7 @@ engine.resourceManager
 
 engine.run();
 
-function addCustomMaterialSpriteEntity(entity: Entity, posX: number, texSize: Vector2, blurSize: number) {
+function addCustomMaterialSpriteEntity(entity: Entity, posX: number, texSize: Vector2, blurSize: number): void {
   rootEntity.addChild(entity);
   entity.transform.setPosition(posX, 0, 0);
   // Create material
