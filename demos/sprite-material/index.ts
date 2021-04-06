@@ -5,7 +5,6 @@ import {
   BlendOperation,
   Camera,
   CullMode,
-  Engine,
   Entity,
   Material,
   RenderQueueType,
@@ -64,10 +63,23 @@ engine.run();
 function addCustomMaterialSpriteEntity(entity: Entity, posX: number, texSize: Vector2, blurSize: number) {
   rootEntity.addChild(entity);
   entity.transform.setPosition(posX, 0, 0);
-  const material = new SpriteBlurMaterial(engine);
-  material.texSize = texSize;
-  material.blurSize = blurSize;
+  // Create material
+  const material = new Material(engine, Shader.find("SpriteBlur"));
   entity.getComponent(SpriteRenderer).setMaterial(material);
+  // Init state
+  const target = material.renderState.blendState.targetBlendState;
+  target.enabled = true;
+  target.sourceColorBlendFactor = BlendFactor.SourceAlpha;
+  target.destinationColorBlendFactor = BlendFactor.OneMinusSourceAlpha;
+  target.sourceAlphaBlendFactor = BlendFactor.One;
+  target.destinationAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
+  target.colorBlendOperation = target.alphaBlendOperation = BlendOperation.Add;
+  material.renderState.depthState.writeEnabled = false;
+  material.renderQueueType = RenderQueueType.Transparent;
+  material.renderState.rasterState.cullMode = CullMode.Off;
+  // Set uniform
+  material.shaderData.setVector2("u_texSize", texSize);
+  material.shaderData.setFloat("u_blurSize", blurSize);
 }
 
 // Custom shader
@@ -141,48 +153,3 @@ const spriteFragmentShader = `
 `;
 
 Shader.create("SpriteBlur", spriteVertShader, spriteFragmentShader);
-
-// Custom material
-class SpriteBlurMaterial extends Material {
-  private _texSize: Vector2 = new Vector2(1.0, 1.0);
-  private _blurSize: number = 0.0;
-
-  // Texture size
-  get texSize(): Vector2 {
-    return this._texSize;
-  }
-
-  set texSize(v: Vector2) {
-    const { _texSize } = this;
-    v.cloneTo(_texSize);
-    this.shaderData.setVector2("u_texSize", _texSize);
-  }
-
-  // Blur size
-  get blurSize(): number {
-    return this._blurSize;
-  }
-
-  set blurSize(size: number) {
-    this._blurSize = size;
-    this.shaderData.setFloat("u_blurSize", size);
-  }
-
-  constructor(engine: Engine) {
-    super(engine, Shader.find("SpriteBlur"));
-
-    const target = this.renderState.blendState.targetBlendState;
-    target.enabled = true;
-    target.sourceColorBlendFactor = BlendFactor.SourceAlpha;
-    target.destinationColorBlendFactor = BlendFactor.OneMinusSourceAlpha;
-    target.sourceAlphaBlendFactor = BlendFactor.One;
-    target.destinationAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
-    target.colorBlendOperation = target.alphaBlendOperation = BlendOperation.Add;
-    this.renderState.depthState.writeEnabled = false;
-    this.renderQueueType = RenderQueueType.Transparent;
-    this.renderState.rasterState.cullMode = CullMode.Off;
-
-    this.texSize = this._texSize;
-    this.blurSize = this._blurSize;
-  }
-}
