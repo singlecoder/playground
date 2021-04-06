@@ -39,14 +39,15 @@ engine.resourceManager
     type: AssetType.Texture2D
   })
   .then((texture) => {
-    texture.wrapModeU = texture.wrapModeV = TextureWrapMode.Clamp;
-    const texSize = new Vector2(texture.width, texture.height);
-
     // Create origin sprite entity.
+    const texSize = new Vector2(texture.width, texture.height);
     const spriteEntity = rootEntity.createChild("spriteBlur");
+
     spriteEntity.addComponent(SpriteRenderer).sprite = new Sprite(engine, texture);
-    const { transform } = spriteEntity;
-    transform.setScale(4, 4, 4);
+    spriteEntity.transform.setScale(4, 4, 4);
+    // The blur algorithm will sample the edges of the texture.
+    // Set the clamp warp mode to avoid mis-sampling caused by repeate warp mode.
+    texture.wrapModeU = texture.wrapModeV = TextureWrapMode.Clamp;
 
     // Display normal
     addCustomMaterialSpriteEntity(spriteEntity, -22.5, texSize, 0.0);
