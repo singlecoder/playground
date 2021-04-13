@@ -1,152 +1,113 @@
 import {
-  AssetType,
+  AmbientLight,
+  BlinnPhongMaterial,
+  Buffer,
+  BufferBindFlag,
+  BufferMesh,
+  BufferUsage,
   Camera,
   Color,
+  DirectLight,
   Engine,
-  Entity,
-  Material,
+  IndexFormat,
+  Mesh,
   MeshRenderer,
-  ModelMesh,
-  PrimitiveMesh,
-  Script,
-  Shader,
   SystemInfo,
-  Texture2D,
   Vector3,
+  VertexElement,
+  VertexElementFormat,
   WebGLEngine
 } from "oasis-engine";
 
-init();
+// Create engine and get root entity.
+const engine = new WebGLEngine("o3-demo");
+const canvas = engine.canvas;
+const rootEntity = engine.sceneManager.activeScene.createRootEntity("Root");
+canvas.width = window.innerWidth * SystemInfo.devicePixelRatio;
+canvas.height = window.innerHeight * SystemInfo.devicePixelRatio;
 
-function init(): void {
-  // Create engine
-  const engine = new WebGLEngine("o3-demo");
-  engine.canvas.width = window.innerWidth * SystemInfo.devicePixelRatio;
-  engine.canvas.height = window.innerHeight * SystemInfo.devicePixelRatio;
+// Create light.
+const lightEntity = rootEntity.createChild("DirectLight");
+const ambient = lightEntity.addComponent(AmbientLight);
+const directLight = lightEntity.addComponent(DirectLight);
+ambient.color = new Color(0.2, 0.2, 0.2);
+directLight.color = new Color(0.3, 0.4, 0.4);
 
-  // Create root entity
-  const rootEntity = engine.sceneManager.activeScene.createRootEntity();
+// Create camera.
+const cameraEntity = rootEntity.createChild("Camera");
+cameraEntity.transform.setPosition(0, 6, 10);
+cameraEntity.transform.lookAt(new Vector3(0, 0, 0));
+cameraEntity.addComponent(Camera);
 
-  // Create camera
-  const cameraEntity = rootEntity.createChild("Camera");
-  cameraEntity.transform.setPosition(0, 10, 10);
-  cameraEntity.transform.lookAt(new Vector3(0, 8, 0));
-  const camera = cameraEntity.addComponent(Camera);
-  camera.farClipPlane = 2000;
-  camera.fieldOfView = 55;
+// Create custom cube.
+// Use createCustomMesh() to create custom cube mesh.
+const cubeEntity = rootEntity.createChild("Cube");
+const cubeRenderer = cubeEntity.addComponent(MeshRenderer);
+const cubeGeometry = createCustomMesh(engine, 1.0);
+const material = new BlinnPhongMaterial(engine);
+cubeEntity.transform.rotate(0, 60, 0);
+cubeRenderer.mesh = cubeGeometry;
+cubeRenderer.setMaterial(material);
 
-  createPlane(engine, rootEntity);
-  engine.run();
-}
-
-/**
- * Create a plane as a child of entity.
- */
-function createPlane(engine: Engine, entity: Entity): void {
-  engine.resourceManager
-    .load<Texture2D>({
-      url: "https://gw.alipayobjects.com/mdn/rms_2e421e/afts/img/A*fRtNTKrsq3YAAAAAAAAAAAAAARQnAQ",
-      type: AssetType.Texture2D
-    })
-    .then((texture) => {
-      const planeEntity = entity.createChild("plane");
-      const meshRenderer = planeEntity.addComponent(MeshRenderer);
-      const material = new Material(engine, shader);
-
-      planeEntity.transform.setRotation(-90, 0, 0);
-      meshRenderer.mesh = PrimitiveMesh.createPlane(engine, 1245, 1245, 100, 100, false);
-      meshRenderer.setMaterial(material);
-
-      planeEntity.addComponent(PlaneAnimation);
-
-      const { shaderData } = material;
-      shaderData.setTexture("u_baseColor", texture);
-      shaderData.setColor("u_fogColor", new Color(0.25, 0.25, 0.25, 1));
-      shaderData.setFloat("u_fogDensity", 0.004);
-      shaderData.setColor("u_color", new Color(86 / 255, 182 / 255, 194 / 255, 1));
-    });
-}
+// Run engine.
+engine.run();
 
 /**
- * Plane animation script.
+ * Create cube geometry with custom BufferGeometry.
+ * @param engine - Engine
+ * @param size - Cube size
+ * @returns Cube mesh
  */
-class PlaneAnimation extends Script {
-  private _planeMesh: ModelMesh;
-  private _initZ: number[];
-  private _counter: number = 0;
+function createCustomMesh(engine: Engine, size: number): Mesh {
+  const geometry = new BufferMesh(engine, "CustomCubeGeometry");
 
-  /**
-   * @override
-   * Called when be enabled first time, only once.
-   */
-  onAwake(): void {
-    const renderer = this.entity.getComponent(MeshRenderer);
-    const mesh = <ModelMesh>renderer.mesh;
-    const { vertexCount } = mesh;
-    const positions = mesh.getPositions();
-    const initZ = new Array<number>(vertexCount);
+  // prettier-ignore
+  // Create vertices data.
+  const vertices: Float32Array = new Float32Array([
+        // Up
+        -size, size, -size, 0, 1, 0, size, size, -size, 0, 1, 0, size, size, size, 0, 1, 0, -size, size, size, 0, 1, 0,
+        // Down
+        -size, -size, -size, 0, -1, 0, size, -size, -size, 0, -1, 0, size, -size, size, 0, -1, 0, -size, -size, size, 0, -1, 0,
+        // Left
+        -size, size, -size, -1, 0, 0, -size, size, size, -1, 0, 0, -size, -size, size, -1, 0, 0, -size, -size, -size, -1, 0, 0,
+        // Right
+        size, size, -size, 1, 0, 0, size, size, size, 1, 0, 0, size, -size, size, 1, 0, 0, size, -size, -size, 1, 0, 0,
+        // Front
+        -size, size, size, 0, 0, 1, size, size, size, 0, 0, 1, size, -size, size, 0, 0, 1, -size, -size, size, 0, 0, 1,
+        // Back
+        -size, size, -size, 0, 0, -1, size, size, -size, 0, 0, -1, size, -size, -size, 0, 0, -1, -size, -size, -size, 0, 0, -1]);
 
-    for (var i = 0; i < vertexCount; i++) {
-      const position = positions[i];
-      position.z += Math.random() * 10 - 10;
-      initZ[i] = position.z;
-    }
-    this._initZ = initZ;
-    this._planeMesh = mesh;
-  }
+  // prettier-ignore
+  // Create indices data.
+  const indices: Uint16Array = new Uint16Array([
+        // Up
+        0, 2, 1, 2, 0, 3,
+        // Down
+        4, 6, 7, 6, 4, 5,
+        // Left
+        8, 10, 9, 10, 8, 11,
+        // Right
+        12, 14, 15, 14, 12, 13,
+        // Front
+        16, 18, 17, 18, 16, 19,
+        // Back
+        20, 22, 23, 22, 20, 21]);
 
-  /**
-   * @override
-   * The main loop, called frame by frame.
-   * @param deltaTime - The deltaTime when the script update.
-   */
-  onUpdate(deltaTime: number): void {
-    const mesh = this._planeMesh;
-    let { _counter: counter, _initZ: initZ } = this;
-    const positions = mesh.getPositions();
-    for (let i = 0, n = positions.length; i < n; i++) {
-      const position = positions[i];
-      position.z = Math.sin(i + counter * 0.00002) * (initZ[i] - initZ[i] * 0.6);
-      counter += 0.1;
-    }
-    mesh.setPositions(positions);
-    mesh.uploadData(false);
-    this._counter = counter;
-  }
+  // Create gpu vertex buffer and index buffer.
+  const vertexBuffer = new Buffer(engine, BufferBindFlag.VertexBuffer, vertices, BufferUsage.Static);
+  const indexBuffer = new Buffer(engine, BufferBindFlag.IndexBuffer, indices, BufferUsage.Static);
+
+  // Bind buffer
+  geometry.setVertexBufferBinding(vertexBuffer, 24);
+  geometry.setIndexBufferBinding(indexBuffer, IndexFormat.UInt16);
+
+  // Add vertexElement
+  geometry.setVertexElements([
+    new VertexElement("POSITION", 0, VertexElementFormat.Vector3, 0),
+    new VertexElement("NORMAL", 12, VertexElementFormat.Vector3, 0)
+  ]);
+
+  // Add one sub geometry.
+  geometry.addSubMesh(0, indices.length);
+  return geometry;
 }
-
-const shader = Shader.create(
-  "test-plane",
-  `uniform mat4 u_MVPMat;
-    attribute vec4 POSITION;
-    attribute vec2 TEXCOORD_0;
-    
-    uniform mat4 u_MVMat;
-    
-    varying vec2 v_uv;
-    varying vec3 v_position;
-    
-    void main() {
-      v_uv = TEXCOORD_0;
-      v_position = (u_MVMat * POSITION).xyz;
-      gl_Position = u_MVPMat * POSITION;
-    }`,
-
-  `
-    uniform sampler2D u_baseColor;
-    uniform vec4 u_color;
-    uniform vec4 u_fogColor;
-    uniform float u_fogDensity;
-    
-    varying vec2 v_uv;
-    varying vec3 v_position;
-    
-    void main() {
-      vec4 color = texture2D(u_baseColor, v_uv) * u_color;
-      float fogDistance = length(v_position);
-      float fogAmount = 1. - exp2(-u_fogDensity * u_fogDensity * fogDistance * fogDistance * 1.442695);
-      fogAmount = clamp(fogAmount, 0., 1.);
-      gl_FragColor = mix(color, u_fogColor, fogAmount); 
-    }
-    `
-);
