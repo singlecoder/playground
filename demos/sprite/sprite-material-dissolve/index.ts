@@ -9,6 +9,7 @@ import {
   Entity,
   Material,
   RenderQueueType,
+  Script,
   Shader,
   Sprite,
   SpriteRenderer,
@@ -17,7 +18,6 @@ import {
   Vector3,
   WebGLEngine
 } from "oasis-engine";
-import { ShaderData } from "../../../../oasis-fork/packages/loader/node_modules/@oasis-engine/core/types/shader/ShaderData";
 
 // Create engine object
 const engine = new WebGLEngine("o3-demo");
@@ -56,10 +56,11 @@ engine.resourceManager
     const spriteEntity = rootEntity.createChild("spriteDissolve");
     spriteEntity.addComponent(SpriteRenderer).sprite = new Sprite(engine, texture);
     spriteEntity.transform.setScale(4, 4, 4);
+    const script = spriteEntity.addComponent(AnimateScript);
     // Add custom material
-    const customMaterial = addCustomMaterial(spriteEntity, textures[1], textures[2]);
+    script.material = addCustomMaterial(spriteEntity, textures[1], textures[2]);
     // Add Data UI
-    addDataGUI(customMaterial);
+    script.guiData = addDataGUI(script.material, script);
   });
 
 engine.run();
@@ -67,17 +68,23 @@ engine.run();
 /**
  * Add data GUI.
  */
-function addDataGUI(material: Material): void {
+function addDataGUI(material: Material, animationScript: AnimateScript): any {
   const { shaderData } = material;
   const gui = new dat.GUI();
   const guiData = {
     threshold: 0.0,
-    edgeLength: 0.0,
+    edgeLength: 0.1,
     reset: () => {
       guiData.threshold = 0.0;
-      guiData.edgeLength = 0.0;
+      guiData.edgeLength = 0.1;
       shaderData.setFloat("u_threshold", 0.0);
-      shaderData.setFloat("u_edgeLength", 0.0);
+      shaderData.setFloat("u_edgeLength", 0.1);
+    },
+    pause: function () {
+      animationScript.enabled = false;
+    },
+    resume: function () {
+      animationScript.enabled = true;
     }
   };
 
@@ -94,6 +101,10 @@ function addDataGUI(material: Material): void {
     })
     .listen();
   gui.add(guiData, "reset").name("重置");
+  gui.add(guiData, "pause").name("暂停动画");
+  gui.add(guiData, "resume").name("继续动画");
+
+  return guiData;
 }
 
 function addCustomMaterial(entity: Entity, noiseTexture: Texture2D, rampTexture: Texture2D): Material {
@@ -115,11 +126,30 @@ function addCustomMaterial(entity: Entity, noiseTexture: Texture2D, rampTexture:
   // Set uniform
   const { shaderData } = material;
   shaderData.setFloat("u_threshold", 0.0);
-  shaderData.setFloat("u_edgeLength", 0.0);
+  shaderData.setFloat("u_edgeLength", 0.1);
   shaderData.setTexture("u_rampTexture", rampTexture);
   shaderData.setTexture("u_noiseTexture", noiseTexture);
 
   return material;
+}
+
+class AnimateScript extends Script {
+  guiData: any;
+  material: Material;
+
+  /**
+   * The main loop, called frame by frame.
+   * @param deltaTime - The deltaTime when the script update.
+   */
+  onUpdate(deltaTime: number): void {
+    const { material, guiData } = this;
+    const { shaderData } = material;
+
+    // Update gui data
+    const threshold = (guiData.threshold = (guiData.threshold + deltaTime * 0.0003) % 1.0);
+    // Update material data
+    shaderData.setFloat("u_threshold", threshold);
+  }
 }
 
 // Custom shader
