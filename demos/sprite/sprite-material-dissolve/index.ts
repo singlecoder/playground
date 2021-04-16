@@ -17,6 +17,7 @@ import {
   Vector3,
   WebGLEngine
 } from "oasis-engine";
+import { ShaderData } from "../../../../oasis-fork/packages/loader/node_modules/@oasis-engine/core/types/shader/ShaderData";
 
 // Create engine object
 const engine = new WebGLEngine("o3-demo");
@@ -67,6 +68,7 @@ engine.run();
  * Add data GUI.
  */
 function addDataGUI(material: Material): void {
+  const { shaderData } = material;
   const gui = new dat.GUI();
   const guiData = {
     threshold: 0.0,
@@ -74,21 +76,21 @@ function addDataGUI(material: Material): void {
     reset: () => {
       guiData.threshold = 0.0;
       guiData.edgeLength = 0.0;
-      material.shaderData.setFloat("u_threshold", 0.0);
-      material.shaderData.setFloat("u_edgeLength", 0.0);
+      shaderData.setFloat("u_threshold", 0.0);
+      shaderData.setFloat("u_edgeLength", 0.0);
     }
   };
 
   gui
     .add(guiData, "threshold", 0.0, 1.0, 0.01)
     .onChange((value: number) => {
-      material.shaderData.setFloat("u_threshold", value);
+      shaderData.setFloat("u_threshold", value);
     })
     .listen();
   gui
     .add(guiData, "edgeLength", 0.0, 0.2, 0.001)
     .onChange((value: number) => {
-      material.shaderData.setFloat("u_edgeLength", value);
+      shaderData.setFloat("u_edgeLength", value);
     })
     .listen();
   gui.add(guiData, "reset").name("重置");
@@ -111,10 +113,11 @@ function addCustomMaterial(entity: Entity, noiseTexture: Texture2D, rampTexture:
   material.renderQueueType = RenderQueueType.Transparent;
   material.renderState.rasterState.cullMode = CullMode.Off;
   // Set uniform
-  material.shaderData.setFloat("u_threshold", 0.0);
-  material.shaderData.setFloat("u_edgeLength", 0.0);
-  material.shaderData.setTexture("u_rampTexture", rampTexture);
-  material.shaderData.setTexture("u_noiseTexture", noiseTexture);
+  const { shaderData } = material;
+  shaderData.setFloat("u_threshold", 0.0);
+  shaderData.setFloat("u_edgeLength", 0.0);
+  shaderData.setTexture("u_rampTexture", rampTexture);
+  shaderData.setTexture("u_noiseTexture", noiseTexture);
 
   return material;
 }
