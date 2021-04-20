@@ -3,10 +3,9 @@ import * as dat from "dat.gui";
 import {
   AssetType,
   BlendFactor,
-  BlendOperation,
   Camera,
   CullMode,
-  Entity,
+  Engine,
   Material,
   RenderQueueType,
   Script,
@@ -15,60 +14,92 @@ import {
   SpriteRenderer,
   SystemInfo,
   Texture2D,
-  Vector3,
   WebGLEngine
 } from "oasis-engine";
 
-// Create engine object
-const engine = new WebGLEngine("o3-demo");
-engine.canvas.width = window.innerWidth * SystemInfo.devicePixelRatio;
-engine.canvas.height = window.innerHeight * SystemInfo.devicePixelRatio;
+init();
 
-const scene = engine.sceneManager.activeScene;
-const rootEntity = scene.createRootEntity();
+function init(): void {
+  // Create engine.
+  const engine = new WebGLEngine("o3-demo");
+  engine.canvas.width = window.innerWidth * SystemInfo.devicePixelRatio;
+  engine.canvas.height = window.innerHeight * SystemInfo.devicePixelRatio;
 
-// Create camera
-const cameraEntity = rootEntity.createChild("Camera");
-cameraEntity.transform.position = new Vector3(0, 0, 50);
-cameraEntity.addComponent(Camera);
-cameraEntity.addComponent(OrbitControl);
+  // Create root entity.
+  const rootEntity = engine.sceneManager.activeScene.createRootEntity();
 
-engine.resourceManager
-  .load<Texture2D>([
-    {
-      url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*L2GNRLWn9EAAAAAAAAAAAAAAARQnAQ",
-      type: AssetType.Texture2D
-    },
-    {
-      // Noise texture
-      url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*j2xJQL0e6J4AAAAAAAAAAAAAARQnAQ",
-      type: AssetType.Texture2D
-    },
-    {
-      // Ramp texture
-      url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*ygj3S7sm4hQAAAAAAAAAAAAAARQnAQ",
-      type: AssetType.Texture2D
-    }
-  ])
-  .then((textures) => {
-    const texture = textures[0];
-    // Create origin sprite entity.
-    const spriteEntity = rootEntity.createChild("spriteDissolve");
-    spriteEntity.addComponent(SpriteRenderer).sprite = new Sprite(engine, texture);
-    spriteEntity.transform.setScale(4, 4, 4);
-    const script = spriteEntity.addComponent(AnimateScript);
-    // Add custom material
-    script.material = addCustomMaterial(spriteEntity, textures[1], textures[2]);
-    // Add Data UI
-    script.guiData = addDataGUI(script.material, script);
-  });
+  // Create camera.
+  const cameraEntity = rootEntity.createChild("Camera");
+  cameraEntity.transform.setPosition(0, 0, 12);
+  cameraEntity.addComponent(Camera);
+  cameraEntity.addComponent(OrbitControl);
 
-engine.run();
+  engine.resourceManager
+    .load([
+      {
+        // Sprite texture
+        url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*L2GNRLWn9EAAAAAAAAAAAAAAARQnAQ",
+        type: AssetType.Texture2D
+      },
+      {
+        // Noise texture
+        url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*j2xJQL0e6J4AAAAAAAAAAAAAARQnAQ",
+        type: AssetType.Texture2D
+      },
+      {
+        // Ramp texture
+        url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*ygj3S7sm4hQAAAAAAAAAAAAAARQnAQ",
+        type: AssetType.Texture2D
+      }
+    ])
+    .then((textures: Texture2D[]) => {
+      // Create origin sprite entity.
+      const spriteEntity = rootEntity.createChild("DissolveSprite");
+      const material = addCustomMaterial(engine, textures[1], textures[2]);
+      const renderer = spriteEntity.addComponent(SpriteRenderer);
+      renderer.sprite = new Sprite(engine, textures[0]);
+      renderer.setMaterial(material);
+
+      // Add dissolve animate script.
+      const script = spriteEntity.addComponent(AnimateScript);
+      // Add custom material.
+      script.material = material;
+      // Add Data UI.
+      script.guiData = addDataGUI(script.material, script);
+    });
+
+  engine.run();
+}
+
+function addCustomMaterial(engine: Engine, noiseTexture: Texture2D, rampTexture: Texture2D): Material {
+  const material = new Material(engine, Shader.find("SpriteDissolve"));
+
+  // Init state.
+  const renderState = material.renderState;
+  const target = renderState.blendState.targetBlendState;
+  target.enabled = true;
+  target.sourceColorBlendFactor = BlendFactor.SourceAlpha;
+  target.destinationColorBlendFactor = BlendFactor.OneMinusSourceAlpha;
+  target.sourceAlphaBlendFactor = BlendFactor.One;
+  target.destinationAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
+  renderState.depthState.writeEnabled = false;
+  renderState.rasterState.cullMode = CullMode.Off;
+  material.renderQueueType = RenderQueueType.Transparent;
+
+  // Set material shader data.
+  const { shaderData } = material;
+  shaderData.setFloat("u_threshold", 0.0);
+  shaderData.setFloat("u_edgeLength", 0.1);
+  shaderData.setTexture("u_rampTexture", rampTexture);
+  shaderData.setTexture("u_noiseTexture", noiseTexture);
+
+  return material;
+}
 
 /**
  * Add data GUI.
  */
-function addDataGUI(material: Material, animationScript: AnimateScript): any {
+function addDataGUI(material: Material, animationScript: AnimateScript) {
   const { shaderData } = material;
   const gui = new dat.GUI();
   const guiData = {
@@ -107,32 +138,6 @@ function addDataGUI(material: Material, animationScript: AnimateScript): any {
   return guiData;
 }
 
-function addCustomMaterial(entity: Entity, noiseTexture: Texture2D, rampTexture: Texture2D): Material {
-  rootEntity.addChild(entity);
-  // Create material
-  const material = new Material(engine, Shader.find("SpriteDissolve"));
-  entity.getComponent(SpriteRenderer).setMaterial(material);
-  // Init state
-  const target = material.renderState.blendState.targetBlendState;
-  target.enabled = true;
-  target.sourceColorBlendFactor = BlendFactor.SourceAlpha;
-  target.destinationColorBlendFactor = BlendFactor.OneMinusSourceAlpha;
-  target.sourceAlphaBlendFactor = BlendFactor.One;
-  target.destinationAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
-  target.colorBlendOperation = target.alphaBlendOperation = BlendOperation.Add;
-  material.renderState.depthState.writeEnabled = false;
-  material.renderQueueType = RenderQueueType.Transparent;
-  material.renderState.rasterState.cullMode = CullMode.Off;
-  // Set uniform
-  const { shaderData } = material;
-  shaderData.setFloat("u_threshold", 0.0);
-  shaderData.setFloat("u_edgeLength", 0.1);
-  shaderData.setTexture("u_rampTexture", rampTexture);
-  shaderData.setTexture("u_noiseTexture", noiseTexture);
-
-  return material;
-}
-
 class AnimateScript extends Script {
   guiData: any;
   material: Material;
@@ -142,13 +147,13 @@ class AnimateScript extends Script {
    * @param deltaTime - The deltaTime when the script update.
    */
   onUpdate(deltaTime: number): void {
-    const { material, guiData } = this;
-    const { shaderData } = material;
+    const { guiData } = this;
+    const threshold = (guiData.threshold + deltaTime * 0.0003) % 1.0;
 
-    // Update gui data
-    const threshold = (guiData.threshold = (guiData.threshold + deltaTime * 0.0003) % 1.0);
-    // Update material data
-    shaderData.setFloat("u_threshold", threshold);
+    // Update gui data.
+    guiData.threshold = threshold;
+    // Update material data.
+    this.material.shaderData.setFloat("u_threshold", threshold);
   }
 }
 
