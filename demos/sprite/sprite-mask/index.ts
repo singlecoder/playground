@@ -31,18 +31,24 @@ engine.resourceManager
   .load([
     {
       // Sprite texture
-      url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*L2GNRLWn9EAAAAAAAAAAAAAAARQnAQ",
+      url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*KjnzTpE8LdAAAAAAAAAAAAAAARQnAQ",
       type: AssetType.Texture2D
     },
     {
       // Mask texture
-      url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*DzLQSLyoJiMAAAAAAAAAAAAAARQnAQ",
+      url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*x5bjT4mlvN8AAAAAAAAAAAAAARQnAQ",
+      type: AssetType.Texture2D
+    },
+    {
+      // Mask texture
+      url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*gfYkSaq_XnsAAAAAAAAAAAAAARQnAQ",
       type: AssetType.Texture2D
     }
   ])
   .then((textures: Texture2D[]) => {
     // Create origin sprite entity.
     const spriteEntity = rootEntity.createChild("Sprite");
+    spriteEntity.transform.setPosition(0, 5, 0);
     const renderer = spriteEntity.addComponent(SpriteRenderer);
     renderer.sprite = new Sprite(engine, textures[0]);
     renderer.maskInteraction = SpriteMaskInteraction.VisibleOutsideMask;
@@ -56,7 +62,7 @@ engine.resourceManager
     renderer1.maskLayer = SpriteMaskLayer.Layer0;
 
     const maskEntity = rootEntity.createChild("SpriteMask");
-    // maskEntity.transform.setScale(1, 5, 5);
+    maskEntity.transform.setPosition(-1, 5, 0);
     const mask = maskEntity.addComponent(SpriteMask);
     mask.sprite = new Sprite(engine, textures[1]);
     mask.influenceLayers = SpriteMaskLayer.Layer1;
@@ -68,11 +74,11 @@ engine.resourceManager
     mask1.influenceLayers = SpriteMaskLayer.Layer0;
 
     const maskEntity2 = rootEntity.createChild("SpriteMask2");
-    // maskEntity.transform.setScale(1, 5, 5);
-    maskEntity2.transform.setPosition(1, 0, 0);
+    maskEntity2.transform.setPosition(1, 5, 0);
     const mask2 = maskEntity2.addComponent(SpriteMask);
-    mask2.sprite = new Sprite(engine, textures[1]);
+    mask2.sprite = new Sprite(engine, textures[2]);
     mask2.influenceLayers = SpriteMaskLayer.Layer1;
+    // mask2.alphaCutoff = 0.6;
   });
 
 engine.run();
