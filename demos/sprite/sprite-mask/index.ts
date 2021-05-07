@@ -73,7 +73,7 @@ engine.resourceManager
     addMask(maskEntity.clone(), pos, scale, sprite2, SpriteMaskLayer.Layer0);
     // Show sprite outside mask.
     pos.setValue(5, 0, 0);
-    scale.setValue(5.5, 5.5, 5.5);
+    scale.setValue(3.4, 5.1, 5.5);
     addSprite(
       spriteEntity.clone(),
       pos,
@@ -84,7 +84,7 @@ engine.resourceManager
     );
     scale.setValue(3, 3, 3);
     addSprite(spriteEntity.clone(), pos, scale, sprite0, SpriteMaskInteraction.None, SpriteMaskLayer.Layer1);
-    pos.setValue(4.5, -0.2, 0);
+    pos.setValue(4.6, -0.2, 0);
     scale.setValue(1.5, 1.5, 1.5);
     addMask(maskEntity.clone(), pos, scale, sprite2, SpriteMaskLayer.Layer1);
   });
