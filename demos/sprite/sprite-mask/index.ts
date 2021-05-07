@@ -2,6 +2,7 @@ import { OrbitControl } from "@oasis-engine/controls";
 import {
   AssetType,
   Camera,
+  Entity,
   Sprite,
   SpriteMask,
   SpriteMaskInteraction,
@@ -31,54 +32,89 @@ engine.resourceManager
   .load([
     {
       // Sprite texture
-      url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*KjnzTpE8LdAAAAAAAAAAAAAAARQnAQ",
+      url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*iMy1Sq0XlVMAAAAAAAAAAAAAARQnAQ",
+      type: AssetType.Texture2D
+    },
+    {
+      // Sprite texture
+      url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*nmWVS7nKt1QAAAAAAAAAAAAAARQnAQ",
       type: AssetType.Texture2D
     },
     {
       // Mask texture
-      url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*x5bjT4mlvN8AAAAAAAAAAAAAARQnAQ",
-      type: AssetType.Texture2D
-    },
-    {
-      // Mask texture
-      url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*gfYkSaq_XnsAAAAAAAAAAAAAARQnAQ",
+      url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*qyhFT5Un5AgAAAAAAAAAAAAAARQnAQ",
       type: AssetType.Texture2D
     }
   ])
   .then((textures: Texture2D[]) => {
-    // Create origin sprite entity.
+    const pos = new Vector3();
+    const scale = new Vector3();
+    // Create sprite.
+    const sprite0 = new Sprite(engine, textures[0]);
+    const sprite1 = new Sprite(engine, textures[1]);
+    const sprite2 = new Sprite(engine, textures[2]);
+    // Create origin sprite entity
     const spriteEntity = rootEntity.createChild("Sprite");
-    spriteEntity.transform.setPosition(0, 5, 0);
-    const renderer = spriteEntity.addComponent(SpriteRenderer);
-    renderer.sprite = new Sprite(engine, textures[0]);
-    renderer.maskInteraction = SpriteMaskInteraction.VisibleOutsideMask;
-    renderer.maskLayer = SpriteMaskLayer.Layer1;
+    // Create origin mask entity
+    const maskEntity = rootEntity.createChild("Mask");
 
-    const cloneSprite = spriteEntity.clone();
-    cloneSprite.parent = rootEntity;
-    cloneSprite.transform.setPosition(0, -5, 0);
-    const renderer1 = cloneSprite.getComponent(SpriteRenderer);
-    renderer1.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-    renderer1.maskLayer = SpriteMaskLayer.Layer0;
-
-    const maskEntity = rootEntity.createChild("SpriteMask");
-    maskEntity.transform.setPosition(-1, 5, 0);
-    const mask = maskEntity.addComponent(SpriteMask);
-    mask.sprite = new Sprite(engine, textures[1]);
-    mask.influenceLayers = SpriteMaskLayer.Layer1;
-
-    const maskEntity1 = rootEntity.createChild("SpriteMask1");
-    maskEntity1.transform.setPosition(0, -5, 0);
-    const mask1 = maskEntity1.addComponent(SpriteMask);
-    mask1.sprite = new Sprite(engine, textures[1]);
-    mask1.influenceLayers = SpriteMaskLayer.Layer0;
-
-    const maskEntity2 = rootEntity.createChild("SpriteMask2");
-    maskEntity2.transform.setPosition(1, 5, 0);
-    const mask2 = maskEntity2.addComponent(SpriteMask);
-    mask2.sprite = new Sprite(engine, textures[2]);
-    mask2.influenceLayers = SpriteMaskLayer.Layer1;
-    // mask2.alphaCutoff = 0.6;
+    // Show sprite inside mask.
+    pos.setValue(-5, 0, 0);
+    scale.setValue(2, 2, 2);
+    addSprite(
+      spriteEntity.clone(),
+      pos,
+      scale,
+      sprite0,
+      SpriteMaskInteraction.VisibleInsideMask,
+      SpriteMaskLayer.Layer0
+    );
+    scale.setValue(1, 1, 1);
+    addMask(maskEntity.clone(), pos, scale, sprite2, SpriteMaskLayer.Layer0);
+    // Show sprite outside mask.
+    pos.setValue(5, 0, 0);
+    scale.setValue(5.5, 5.5, 5.5);
+    addSprite(
+      spriteEntity.clone(),
+      pos,
+      scale,
+      sprite1,
+      SpriteMaskInteraction.VisibleOutsideMask,
+      SpriteMaskLayer.Layer1
+    );
+    scale.setValue(3, 3, 3);
+    addSprite(spriteEntity.clone(), pos, scale, sprite0, SpriteMaskInteraction.None, SpriteMaskLayer.Layer1);
+    pos.setValue(4.5, -0.2, 0);
+    scale.setValue(1.5, 1.5, 1.5);
+    addMask(maskEntity.clone(), pos, scale, sprite2, SpriteMaskLayer.Layer1);
   });
 
 engine.run();
+
+function addSprite(
+  entity: Entity,
+  pos: Vector3,
+  scale: Vector3,
+  sprite: Sprite,
+  maskInteraction: SpriteMaskInteraction,
+  maskLayer: number
+): void {
+  rootEntity.addChild(entity);
+  const { transform } = entity;
+  transform.position = pos;
+  transform.scale = scale;
+  const renderer = entity.addComponent(SpriteRenderer);
+  renderer.sprite = sprite;
+  renderer.maskInteraction = maskInteraction;
+  renderer.maskLayer = maskLayer;
+}
+
+function addMask(entity: Entity, pos: Vector3, scale: Vector3, sprite: Sprite, influenceLayers: number): void {
+  rootEntity.addChild(entity);
+  const { transform } = entity;
+  transform.position = pos;
+  transform.scale = scale;
+  const mask = entity.addComponent(SpriteMask);
+  mask.sprite = sprite;
+  mask.influenceLayers = influenceLayers;
+}
