@@ -14,19 +14,20 @@ import {
   WebGLEngine
 } from "oasis-engine";
 
-// Create engine object
+// Create engine.
 const engine = new WebGLEngine("o3-demo", { stencil: true });
 engine.canvas.resizeByClientSize();
 
-const scene = engine.sceneManager.activeScene;
-const rootEntity = scene.createRootEntity();
+// Create root entity.
+const rootEntity = engine.sceneManager.activeScene.createRootEntity();
 
-// Create camera
+// Create camera.
 const cameraEntity = rootEntity.createChild("Camera");
 cameraEntity.transform.setPosition(0, 0, 50);
 cameraEntity.addComponent(Camera);
 cameraEntity.addComponent(OrbitControl);
 
+// Create sprite and mask.
 engine.resourceManager
   .load([
     {
@@ -48,78 +49,67 @@ engine.resourceManager
   .then((textures: Texture2D[]) => {
     const pos = new Vector3();
     const scale = new Vector3();
-    // Create sprite.
-    const sprite0 = new Sprite(engine, textures[0]);
-    const sprite1 = new Sprite(engine, textures[1]);
-    const sprite2 = new Sprite(engine, textures[2]);
-    // Create origin sprite entity
-    const spriteEntity = rootEntity.createChild("Sprite");
-    // Create origin mask entity
-    const maskEntity = rootEntity.createChild("Mask");
 
-    // Show sprite inside mask.
+    // Create sprites.
+    const sprite = new Sprite(engine, textures[0]);
+    const maskSprite0 = new Sprite(engine, textures[1]);
+    const maksSprite1 = new Sprite(engine, textures[2]);
+
+    // Show inside mask.
     pos.setValue(-5, 0, 0);
     scale.setValue(3, 3, 3);
-    addSprite(
-      spriteEntity.clone(),
-      pos,
-      scale,
-      sprite0,
-      SpriteMaskInteraction.VisibleInsideMask,
-      SpriteMaskLayer.Layer0
-    );
-    addMask(maskEntity.clone(), pos, sprite1, SpriteMaskLayer.Layer0, "scale");
+    addSpriteRenderer(pos, scale, sprite, SpriteMaskInteraction.VisibleInsideMask, SpriteMaskLayer.Layer0);
+    addMask(pos, maskSprite0, SpriteMaskLayer.Layer0, ScaleScript);
 
-    // Show sprite outside mask.
+    // Show outside mask.
     pos.setValue(5, 0, 0);
     scale.setValue(3, 3, 3);
-    addSprite(
-      spriteEntity.clone(),
-      pos,
-      scale,
-      sprite0,
-      SpriteMaskInteraction.VisibleOutsideMask,
-      SpriteMaskLayer.Layer1
-    );
-    addMask(maskEntity.clone(), pos, sprite2, SpriteMaskLayer.Layer1);
+    addSpriteRenderer(pos, scale, sprite, SpriteMaskInteraction.VisibleOutsideMask, SpriteMaskLayer.Layer1);
+    addMask(pos, maksSprite1, SpriteMaskLayer.Layer1, RotationScript);
   });
 
 engine.run();
 
-function addSprite(
-  entity: Entity,
+/**
+ * Add sprite renderer and set mask interaction and layer.
+ */
+function addSpriteRenderer(
   pos: Vector3,
   scale: Vector3,
   sprite: Sprite,
   maskInteraction: SpriteMaskInteraction,
   maskLayer: number
 ): void {
-  rootEntity.addChild(entity);
+  const entity = rootEntity.createChild("Sprite");
+  const renderer = entity.addComponent(SpriteRenderer);
   const { transform } = entity;
+
   transform.position = pos;
   transform.scale = scale;
-  const renderer = entity.addComponent(SpriteRenderer);
   renderer.sprite = sprite;
   renderer.maskInteraction = maskInteraction;
   renderer.maskLayer = maskLayer;
 }
 
-function addMask(entity: Entity, pos: Vector3, sprite: Sprite, influenceLayers: number, aniType: String = ""): void {
-  rootEntity.addChild(entity);
-  entity.transform.position = pos;
+/**
+ * Add sprite mask and set influence layers, include mask animation script.
+ */
+function addMask<T extends Script>(
+  pos: Vector3,
+  sprite: Sprite,
+  influenceLayers: number,
+  scriptType: new (entity: Entity) => T
+): void {
+  const entity = rootEntity.createChild("Mask");
   const mask = entity.addComponent(SpriteMask);
+
+  entity.addComponent(scriptType);
+  entity.transform.position = pos;
   mask.sprite = sprite;
   mask.influenceLayers = influenceLayers;
-
-  if (aniType === "scale") {
-    entity.addComponent(ScaleScript);
-  } else {
-    entity.addComponent(RotationScript);
-  }
 }
 
 class ScaleScript extends Script {
-  private _curScale: number = 1.0;
   private _scaleSpeed: number = 0.01;
 
   /**
@@ -127,30 +117,26 @@ class ScaleScript extends Script {
    * @param deltaTime - The deltaTime when the script update.
    */
   onUpdate(deltaTime: number): void {
-    let curScale = this._curScale;
+    const { transform } = this.entity;
+    let curScale = transform.scale.x;
 
-    if (curScale >= 2) {
-      this._scaleSpeed = -0.01;
-    } else if (curScale <= 0) {
-      this._scaleSpeed = 0.01;
+    if (curScale <= 0 || curScale >= 2) {
+      this._scaleSpeed *= -1;
     }
 
     curScale += this._scaleSpeed;
-    this._curScale = curScale;
-    this.entity.transform.setScale(curScale, curScale, curScale);
+    transform.setScale(curScale, curScale, curScale);
   }
 }
 
 class RotationScript extends Script {
-  private _curRotation: number = 0.0;
-  private _rotationSpeed: number = 0.5;
+  private _rotationSpeed: number = -0.5;
 
   /**
    * The main loop, called frame by frame.
    * @param deltaTime - The deltaTime when the script update.
    */
   onUpdate(deltaTime: number): void {
-    this._curRotation += this._rotationSpeed;
-    this.entity.transform.setRotation(0, 0, this._curRotation);
+    this.entity.transform.rotate(0, 0, this._rotationSpeed);
   }
 }
