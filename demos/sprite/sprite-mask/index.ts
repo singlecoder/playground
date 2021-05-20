@@ -3,6 +3,7 @@ import {
   AssetType,
   Camera,
   Entity,
+  Script,
   Sprite,
   SpriteMask,
   SpriteMaskInteraction,
@@ -36,13 +37,13 @@ engine.resourceManager
       type: AssetType.Texture2D
     },
     {
-      // Sprite texture
-      url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*nmWVS7nKt1QAAAAAAAAAAAAAARQnAQ",
+      // Mask texture
+      url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*qyhFT5Un5AgAAAAAAAAAAAAAARQnAQ",
       type: AssetType.Texture2D
     },
     {
       // Mask texture
-      url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*qyhFT5Un5AgAAAAAAAAAAAAAARQnAQ",
+      url: "https://gw.alipayobjects.com/mdn/rms_7c464e/afts/img/A*pgrpQIneqSUAAAAAAAAAAAAAARQnAQ",
       type: AssetType.Texture2D
     }
   ])
@@ -60,7 +61,7 @@ engine.resourceManager
 
     // Show sprite inside mask.
     pos.setValue(-5, 0, 0);
-    scale.setValue(2, 2, 2);
+    scale.setValue(3, 3, 3);
     addSprite(
       spriteEntity.clone(),
       pos,
@@ -69,24 +70,20 @@ engine.resourceManager
       SpriteMaskInteraction.VisibleInsideMask,
       SpriteMaskLayer.Layer0
     );
-    scale.setValue(1, 1, 1);
-    addMask(maskEntity.clone(), pos, scale, sprite2, SpriteMaskLayer.Layer0);
+    addMask(maskEntity.clone(), pos, sprite1, SpriteMaskLayer.Layer0, "scale");
+
     // Show sprite outside mask.
     pos.setValue(5, 0, 0);
-    scale.setValue(3.4, 5.1, 5.5);
+    scale.setValue(3, 3, 3);
     addSprite(
       spriteEntity.clone(),
       pos,
       scale,
-      sprite1,
+      sprite0,
       SpriteMaskInteraction.VisibleOutsideMask,
       SpriteMaskLayer.Layer1
     );
-    scale.setValue(3, 3, 3);
-    addSprite(spriteEntity.clone(), pos, scale, sprite0, SpriteMaskInteraction.None, SpriteMaskLayer.Layer1);
-    pos.setValue(4.6, -0.2, 0);
-    scale.setValue(1.5, 1.5, 1.5);
-    addMask(maskEntity.clone(), pos, scale, sprite2, SpriteMaskLayer.Layer1);
+    addMask(maskEntity.clone(), pos, sprite2, SpriteMaskLayer.Layer1);
   });
 
 engine.run();
@@ -109,12 +106,53 @@ function addSprite(
   renderer.maskLayer = maskLayer;
 }
 
-function addMask(entity: Entity, pos: Vector3, scale: Vector3, sprite: Sprite, influenceLayers: number): void {
+function addMask(entity: Entity, pos: Vector3, sprite: Sprite, influenceLayers: number, aniType: String = ""): void {
   rootEntity.addChild(entity);
-  const { transform } = entity;
-  transform.position = pos;
-  transform.scale = scale;
+  entity.transform.position = pos;
   const mask = entity.addComponent(SpriteMask);
   mask.sprite = sprite;
   mask.influenceLayers = influenceLayers;
+
+  if (aniType === "scale") {
+    entity.addComponent(ScaleScript);
+  } else {
+    entity.addComponent(RotationScript);
+  }
+}
+
+class ScaleScript extends Script {
+  private _curScale: number = 1.0;
+  private _scaleSpeed: number = 0.01;
+
+  /**
+   * The main loop, called frame by frame.
+   * @param deltaTime - The deltaTime when the script update.
+   */
+  onUpdate(deltaTime: number): void {
+    let curScale = this._curScale;
+
+    if (curScale >= 2) {
+      this._scaleSpeed = -0.01;
+    } else if (curScale <= 0) {
+      this._scaleSpeed = 0.01;
+    }
+
+    curScale += this._scaleSpeed;
+    this._curScale = curScale;
+    this.entity.transform.setScale(curScale, curScale, curScale);
+  }
+}
+
+class RotationScript extends Script {
+  private _curRotation: number = 0.0;
+  private _rotationSpeed: number = 0.5;
+
+  /**
+   * The main loop, called frame by frame.
+   * @param deltaTime - The deltaTime when the script update.
+   */
+  onUpdate(deltaTime: number): void {
+    this._curRotation += this._rotationSpeed;
+    this.entity.transform.setRotation(0, 0, this._curRotation);
+  }
 }
